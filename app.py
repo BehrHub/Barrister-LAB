@@ -259,7 +259,6 @@ def render_splash_screen() -> None:
             display: flex;
             align-items: center;
             justify-content: center;
-            padding-bottom: 20vh;
         }}
 
         .splash-orb {{
@@ -498,29 +497,21 @@ def render_testing_lab() -> None:
         .lab-flip-front { background: linear-gradient(145deg, rgba(45,212,191,.28), rgba(45,212,191,.08)); border: 1px solid rgba(var(--accent-teal-rgb),.4); }
         .lab-flip-back { transform: rotateY(180deg); background: linear-gradient(145deg, rgba(56,189,248,.28), rgba(56,189,248,.08)); border: 1px solid rgba(var(--accent-blue-rgb),.4); font-size: 1rem; }
 
-        /* 2. COUNT-UP */
-        @property --lab-count { syntax: '<integer>'; inherits: false; initial-value: 0; }
-        .lab-count-num { --lab-count: 0; font-size: 2.4rem; font-weight: 900; color: var(--text-primary); counter-reset: labcount var(--lab-count); }
-        .lab-count-num::after { content: counter(labcount); }
-        .lab-toggle:checked ~ .lab-stage-label .lab-count-num { animation: labCountUp 1.4s cubic-bezier(.2,.7,.3,1) forwards; }
-        @keyframes labCountUp { to { --lab-count: 76; } }
+        /* 2. COUNT-UP -- plain JS, not a CSS trick. Reliability over cleverness. */
+        .lab-count-num { font-size: 2.4rem; font-weight: 900; color: var(--text-primary); }
 
-        /* 3. CELEBRATION BURST */
-        .lab-burst-core { width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle, var(--accent-gold), rgba(245,197,66,0)); transform: scale(0); }
-        .lab-toggle:checked ~ .lab-stage-label .lab-burst-core { animation: labBurstCore .5s ease-out forwards; }
-        @keyframes labBurstCore { 0% { transform: scale(0); opacity: 1; } 60% { transform: scale(1.4); opacity: 1; } 100% { transform: scale(1); opacity: .9; } }
-        .lab-burst-particle { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-teal); opacity: 0; transform: translate(-50%, -50%); }
-        .lab-toggle:checked ~ .lab-stage-label .lab-burst-particle { animation: labBurstFly .8s ease-out forwards; animation-delay: .1s; }
-        @keyframes labBurstFly { 0% { opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) translate(var(--bx), var(--by)) scale(.4); } }
+        /* 3. CELEBRATION BURST -- transition on the base rule, value just changes on :checked */
+        .lab-burst-core { width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle, var(--accent-gold), rgba(245,197,66,0)); transform: scale(0); opacity: 0; transition: transform .45s cubic-bezier(.34,1.56,.64,1), opacity .25s ease; }
+        .lab-toggle:checked ~ .lab-stage-label .lab-burst-core { transform: scale(1); opacity: .9; }
+        .lab-burst-particle { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-teal); opacity: 1; transform: translate(-50%, -50%) translate(0, 0) scale(1); transition: transform .75s ease-out, opacity .75s ease-out; }
+        .lab-toggle:checked ~ .lab-stage-label .lab-burst-particle { opacity: 0; transform: translate(-50%, -50%) translate(var(--bx), var(--by)) scale(.4); }
 
-        /* 4. PROGRESS RING */
+        /* 4. PROGRESS RING -- same proven pattern: transition always present, only the value moves */
         .lab-ring-track { stroke: rgba(var(--slate-border-rgb),.25); }
-        .lab-ring-fill { stroke: var(--accent-purple); stroke-linecap: round; stroke-dasharray: 226; stroke-dashoffset: 226; transform-origin: center; transform: rotate(-90deg); transition: none; }
-        .lab-toggle:checked ~ .lab-stage-label .lab-ring-fill { animation: labRingFill 1.3s cubic-bezier(.3,.7,.3,1) forwards; }
-        @keyframes labRingFill { to { stroke-dashoffset: 40; } }
-        .lab-ring-label { position: absolute; font-size: 1.05rem; font-weight: 900; color: var(--text-primary); opacity: 0; }
-        .lab-toggle:checked ~ .lab-stage-label .lab-ring-label { animation: labRiseIn .4s ease .9s forwards; }
-        @keyframes labRiseIn { to { opacity: 1; } }
+        .lab-ring-fill { stroke: var(--accent-purple); stroke-linecap: round; stroke-dasharray: 226; stroke-dashoffset: 226; transform-origin: center; transform: rotate(-90deg); transition: stroke-dashoffset 1.1s cubic-bezier(.3,.7,.3,1); }
+        .lab-toggle:checked ~ .lab-stage-label .lab-ring-fill { stroke-dashoffset: 40; }
+        .lab-ring-label { position: absolute; font-size: 1.05rem; font-weight: 900; color: var(--text-primary); opacity: 0; transition: opacity .4s ease .7s; }
+        .lab-toggle:checked ~ .lab-stage-label .lab-ring-label { opacity: 1; }
         </style>
         <div class="lab-grid">
             <div class="lab-card">
@@ -540,7 +531,22 @@ def render_testing_lab() -> None:
             <div class="lab-card">
                 <div class="lab-card-title">2 · Count-Up</div>
                 <div class="lab-card-use">A KPI counts up from 0 on reveal instead of just appearing — good for first paint of a page.</div>
-                <input type="checkbox" id="lab2" class="lab-toggle">
+                <input type="checkbox" id="lab2" class="lab-toggle" onchange="
+                    var el = this.closest('.lab-card').querySelector('.lab-count-num');
+                    if (this.checked) {
+                        var start = null; var dur = 1200; var target = 76;
+                        function step(ts) {
+                            if (!start) { start = ts; }
+                            var p = Math.min((ts - start) / dur, 1);
+                            var eased = 1 - Math.pow(1 - p, 3);
+                            el.textContent = Math.round(eased * target);
+                            if (p < 1) { requestAnimationFrame(step); }
+                        }
+                        requestAnimationFrame(step);
+                    } else {
+                        el.textContent = '';
+                    }
+                ">
                 <label for="lab2" class="lab-stage-label">
                     <div class="lab-stage">
                         <div class="lab-count-num"></div>
@@ -557,7 +563,7 @@ def render_testing_lab() -> None:
                         <div class="lab-burst-core"></div>
                         """
         + "".join(
-            f'<div class="lab-burst-particle" style="--bx:{bx}px; --by:{by}px; animation-delay:{0.08 + index * 0.015:.2f}s;"></div>'
+            f'<div class="lab-burst-particle" style="--bx:{bx}px; --by:{by}px; transition-delay:{0.05 + index * 0.02:.2f}s;"></div>'
             for index, (bx, by) in enumerate(
                 [(46, -8), (-44, -12), (30, 34), (-32, 32), (10, -46), (-10, 46), (48, 20), (-48, -20)]
             )
