@@ -186,7 +186,9 @@ def render_splash_screen() -> None:
         .stApp {{
             overflow: hidden !important;
             height: 100vh !important;
+            height: 100dvh !important;
             max-height: 100vh !important;
+            max-height: 100dvh !important;
             overscroll-behavior: none !important;
             touch-action: none;
         }}
@@ -197,6 +199,7 @@ def render_splash_screen() -> None:
             max-width: none !important;
             width: 100vw !important;
             height: 100vh !important;
+            height: 100dvh !important;
             padding: 0 !important;
             margin: 0 !important;
         }}
@@ -254,6 +257,7 @@ def render_splash_screen() -> None:
             inset: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             background: var(--bg-void);
             display: flex;
