@@ -227,8 +227,8 @@ def render_splash_screen() -> None:
             50% {{ box-shadow: 0 0 0 1px rgba(var(--accent-teal-rgb),.75), 0 0 36px rgba(var(--accent-teal-rgb),.4), 0 10px 26px rgba(0,0,0,.35); }}
         }}
         @keyframes splashRoadDraw {{
-            from {{ opacity: 0; transform: scaleX(0); }}
-            to {{ opacity: 1; transform: scaleX(1); }}
+            from {{ opacity: 0; transform: translateY(-50%) scaleX(0); }}
+            to {{ opacity: 1; transform: translateY(-50%) scaleX(1); }}
         }}
         @keyframes splashCarEntrance {{
             0%   {{ transform: translate(-160%, 8px) scale(1); }}
@@ -314,11 +314,10 @@ def render_splash_screen() -> None:
             right: 0;
             top: 50%;
             height: 3px;
-            transform: translateY(-50%) scaleX(0);
+            transform: translateY(-50%);
             transform-origin: center;
             border-radius: 999px;
             z-index: 0;
-            opacity: 0;
             background: repeating-linear-gradient(to right, var(--text-pale-slate) 0 10px, transparent 10px 20px);
             box-shadow: 0 0 14px rgba(var(--accent-teal-rgb),.22);
             animation: splashRoadDraw .5s var(--ease-standard) .05s forwards;
@@ -370,8 +369,6 @@ def render_splash_screen() -> None:
             border-radius: 999px;
             background: linear-gradient(90deg, transparent, var(--accent-teal) 50%, transparent);
             transform-origin: center;
-            transform: scaleX(0);
-            opacity: 0;
             animation: splashScanGrow .7s var(--ease-standard) 1.42s forwards;
         }}
         .splash-enter-btn {{
@@ -392,7 +389,6 @@ def render_splash_screen() -> None:
             text-decoration: none !important;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
-            opacity: 0;
             animation: splashRiseIn .55s var(--ease-emphasized) 1.62s forwards, splashGlowPulse 2.6s ease-in-out 2.2s infinite;
             transition: transform .18s var(--ease-standard), background .18s var(--ease-standard);
         }}
