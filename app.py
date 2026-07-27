@@ -662,9 +662,9 @@ def render_executive_page() -> None:
         .exec-lever-label { padding: .34rem .78rem; border-radius: 999px; border: 1px solid rgba(var(--slate-border-rgb),.3); background: rgba(var(--surface-rgb),.4); color: var(--text-muted); font-size: .6rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s ease, color .2s ease, border-color .2s ease; }
         .exec-lever-toggle:checked ~ .exec-lever-label { background: linear-gradient(135deg, rgba(var(--accent-teal-rgb),.28), rgba(var(--accent-teal-rgb),.1)); color: var(--text-primary); border-color: rgba(var(--accent-teal-rgb),.55); }
         .exec-trend-view { display: none; }
-        #trendWeekly:checked ~ .exec-trend-panel #viewWeekly,
-        #trendMonthly:checked ~ .exec-trend-panel #viewMonthly,
-        #trendWeekday:checked ~ .exec-trend-panel #viewWeekday { display: block; }
+        #trendWeekly:checked ~ .exec-trend-views #viewWeekly,
+        #trendMonthly:checked ~ .exec-trend-views #viewMonthly,
+        #trendWeekday:checked ~ .exec-trend-views #viewWeekday { display: block; }
         .exec-bar-row { display: flex; align-items: flex-end; gap: .5rem; height: 130px; padding: 0 .1rem; }
         .exec-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .35rem; height: 100%; justify-content: flex-end; }
         .exec-bar-shape { width: 100%; max-width: 30px; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, var(--accent-teal), rgba(45,212,191,.35)); position: relative; }
@@ -698,10 +698,28 @@ def render_executive_page() -> None:
         .exec-milestone-detail { font-size: .58rem; color: var(--text-muted); }
         .exec-progress-track { height: 7px; border-radius: 999px; background: rgba(var(--slate-border-rgb),.2); overflow: hidden; }
         .exec-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-teal), var(--accent-blue)); }
+
+        @keyframes cmdRise { from { opacity: 0; transform: var(--cmd-rest) translateY(46px) scale(.7); } to { opacity: 1; transform: var(--cmd-rest); } }
+        .cmd-deck { perspective: 1200px; display: flex; justify-content: center; align-items: flex-end; padding: .2rem 0 1.4rem; }
+        .cmd-card { position: relative; width: 88px; height: 106px; margin: 0 -15px; border-radius: 14px; border: 1px solid rgba(var(--slate-border-rgb),.3); background: linear-gradient(155deg, rgba(24,40,64,.96), rgba(8,18,32,.98)); box-shadow: 0 20px 36px rgba(0,0,0,.4), inset 0 1px 0 rgba(var(--white-rgb),.06); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .22rem; transform: var(--cmd-rest); transform-style: preserve-3d; animation: cmdRise .6s var(--ease-emphasized) both; }
+        .cmd-card:nth-child(1) { --cmd-rest: rotateY(16deg) translateY(15px) scale(.9); z-index: 1; animation-delay: .04s; border-color: rgba(var(--accent-teal-rgb),.28); }
+        .cmd-card:nth-child(2) { --cmd-rest: rotateY(7deg) translateY(4px) scale(.97); z-index: 2; animation-delay: .12s; border-color: rgba(var(--accent-blue-rgb),.3); }
+        .cmd-card:nth-child(3) { --cmd-rest: rotateY(-7deg) translateY(-6px) scale(1.03); z-index: 3; animation-delay: .2s; border-color: rgba(var(--accent-gold-rgb),.32); }
+        .cmd-card:nth-child(4) { --cmd-rest: rotateY(-17deg) translateY(-17px) scale(1.09); z-index: 4; animation-delay: .28s; border-color: rgba(var(--accent-purple),.5); box-shadow: 0 24px 42px rgba(0,0,0,.5), 0 0 30px rgba(var(--accent-teal-rgb),.15), inset 0 1px 0 rgba(var(--white-rgb),.08); }
+        .cmd-icon { font-size: 1.15rem; filter: drop-shadow(0 3px 6px rgba(0,0,0,.4)); }
+        .cmd-value { font-size: 1.28rem; font-weight: 900; color: var(--text-primary); line-height: 1; }
+        .cmd-label { font-size: .5rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
+        @media (max-width: 700px) { .cmd-card { width: 74px; height: 92px; margin: 0 -11px; } .cmd-value { font-size: 1.05rem; } .cmd-icon { font-size: .95rem; } }
         </style>
         <div class="page-nav"><a href="?page=lab" target="_self">&larr; Lab</a><a href="?page=exec" target="_self" class="active">Executive</a></div>
         <div class="section-kicker">DEMO DATA &middot; STRUCTURE PREVIEW</div>
         <div class="section-title">EXECUTIVE SUMMARY</div>
+        <div class="cmd-deck">
+        <div class="cmd-card"><div class="cmd-icon">&#127937;</div><div class="cmd-value">76</div><div class="cmd-label">Events</div></div>
+        <div class="cmd-card"><div class="cmd-icon">&#129309;</div><div class="cmd-value">30</div><div class="cmd-label">Clients</div></div>
+        <div class="cmd-card"><div class="cmd-icon">&#128176;</div><div class="cmd-value">$14.3k</div><div class="cmd-label">Revenue</div></div>
+        <div class="cmd-card"><div class="cmd-icon">&#127942;</div><div class="cmd-value">A</div><div class="cmd-label">Grade</div></div>
+        </div>
         <div class="exec-ticker"><div class="exec-ticker-track">
         <span class="exec-ticker-item">&#127937; <strong>76</strong> CAREER EVENTS</span><span class="exec-ticker-dot"></span>
         <span class="exec-ticker-item">&#128176; THIS WEEK <strong>$480</strong></span><span class="exec-ticker-dot"></span>
@@ -738,7 +756,7 @@ def render_executive_page() -> None:
         <input type="radio" name="trendview" id="trendWeekly" class="exec-lever-toggle" checked><label for="trendWeekly" class="exec-lever-label" style="margin-right:.4rem;display:inline-block;">Weekly</label>
         <input type="radio" name="trendview" id="trendMonthly" class="exec-lever-toggle"><label for="trendMonthly" class="exec-lever-label" style="margin-right:.4rem;display:inline-block;">Monthly</label>
         <input type="radio" name="trendview" id="trendWeekday" class="exec-lever-toggle"><label for="trendWeekday" class="exec-lever-label" style="display:inline-block;">Weekday</label>
-        <div style="margin-top:.8rem;">
+        <div class="exec-trend-views" style="margin-top:.8rem;">
         <div class="exec-trend-view" id="viewWeekly"><div class="exec-bar-row">
         <div class="exec-bar-col"><div class="exec-bar-shape" style="height:38%"></div><div class="exec-bar-label">W1</div></div>
         <div class="exec-bar-col"><div class="exec-bar-shape" style="height:52%"></div><div class="exec-bar-label">W2</div></div>
