@@ -603,222 +603,527 @@ def render_testing_lab() -> None:
 
 
 def render_executive_page() -> None:
-    st.markdown(
-        """
-        <style>
-        .page-nav { display: flex; gap: .5rem; margin-bottom: .8rem; }
-        .page-nav a { color: var(--text-muted) !important; text-decoration: none !important; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: .4rem .8rem; border-radius: 999px; border: 1px solid rgba(var(--slate-border-rgb),.28); transition: color .18s ease, border-color .18s ease; }
-        .page-nav a:hover { color: var(--text-primary) !important; border-color: rgba(var(--accent-teal-rgb),.5); }
-        .page-nav a.active { color: var(--accent-teal) !important; border-color: rgba(var(--accent-teal-rgb),.5); }
+    """Executive Summary page.
+Rendered as a single st.markdown(unsafe_allow_html=True) string.
+Environment constraints honoured here:
+  - no <script> (stripped by dangerouslySetInnerHTML); interactivity is pure CSS :checked
+  - every :checked selector is a *sibling* chain verified against the literal nesting below
+  - _compact() guarantees no blank line survives into the markup (CommonMark code-block trap)
+  - no element's visibility depends on an animation completing; base state is the final state
+  - no percentage heights on flex items in a column container; bar heights are computed px
+Swap EXEC_DATA below for the live query result; field names match the data layer.
+"""
+    d = {
+        "career_events": 76,
+        "career_revenue": 14300,
+        "unique_clients": 30,
+        "repeat_clients": 20,
+        "first_time_clients": 10,
+        "current_streak": 6,
+        "best_streak": 14,
+        "weekly": [
+            {"label": "W1", "events": 5, "revenue": 520, "is_record": False},
+            {"label": "W2", "events": 7, "revenue": 690, "is_record": False},
+            {"label": "W3", "events": 13, "revenue": 1240, "is_record": True},
+            {"label": "W4", "events": 8, "revenue": 830, "is_record": False},
+            {"label": "W5", "events": 9, "revenue": 910, "is_record": False},
+            {"label": "W6", "events": 7, "revenue": 480, "is_record": False},
+        ],
+        "monthly": [
+            {"label": "APR", "events": 9, "revenue": 1680, "is_record": False},
+            {"label": "MAY", "events": 14, "revenue": 2540, "is_record": False},
+            {"label": "JUN", "events": 17, "revenue": 3120, "is_record": False},
+            {"label": "JUL", "events": 21, "revenue": 3970, "is_record": True},
+        ],
+        "weekday": [
+            {"label": "MON", "events": 5, "revenue": 640, "is_record": False},
+            {"label": "TUE", "events": 17, "revenue": 2180, "is_record": True},
+            {"label": "WED", "events": 12, "revenue": 1490, "is_record": False},
+            {"label": "THU", "events": 9, "revenue": 1120, "is_record": False},
+            {"label": "FRI", "events": 14, "revenue": 1760, "is_record": False},
+        ],
+        "clients": [
+            {"name": "Macy's", "events": 12, "revenue": 2140},
+            {"name": "Bloomingdale's", "events": 9, "revenue": 1620},
+            {"name": "Hampton Inn", "events": 7, "revenue": 1180},
+            {"name": "Davis Polk & Wardwell", "events": 6, "revenue": 980},
+            {"name": "Dunkin", "events": 5, "revenue": 720},
+        ],
+        "sectors": [
+            {"name": "Retail", "pct": 42, "color": "var(--accent-coral)"},
+            {"name": "Hospitality", "pct": 24, "color": "var(--accent-blue)"},
+            {"name": "Legal", "pct": 18, "color": "var(--accent-gold)"},
+            {"name": "Government", "pct": 10, "color": "var(--accent-purple)"},
+            {"name": "Food Service", "pct": 6, "color": "var(--accent-success)"},
+        ],
+        "milestones": [
+            {"name": "First 50 Events", "detail": "Achieved", "pct": 100, "done": True},
+            {"name": "5 Jurisdictions", "detail": "Achieved", "pct": 100, "done": True},
+            {"name": "10-Day Streak", "detail": "Achieved", "pct": 100, "done": True},
+            {"name": "$25,000 Career Revenue", "detail": "$14.3k of $25k", "pct": 57, "done": False},
+            {"name": "100 Career Events", "detail": "76 of 100", "pct": 76, "done": False},
+        ],
+    }
 
-        @keyframes execTickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-        .exec-ticker { position: relative; overflow: hidden; border: 1px solid rgba(var(--slate-border-rgb),.24); border-radius: var(--radius-md); background: linear-gradient(90deg, rgba(var(--navy-900-rgb),.7), rgba(var(--surface-rgb),.5)); margin: 0 0 1rem; height: 36px; display: flex; align-items: center; }
-        .exec-ticker::before, .exec-ticker::after { content: ""; position: absolute; top: 0; bottom: 0; width: 24px; z-index: 1; pointer-events: none; }
-        .exec-ticker::before { left: 0; background: linear-gradient(90deg, rgba(var(--navy-900-rgb),.9), transparent); }
-        .exec-ticker::after { right: 0; background: linear-gradient(270deg, rgba(var(--navy-900-rgb),.9), transparent); }
-        .exec-ticker-track { display: flex; align-items: center; gap: 1.8rem; width: max-content; padding: 0 1rem; animation: execTickerScroll 22s linear infinite; }
-        .exec-ticker-item { flex: 0 0 auto; display: flex; align-items: center; gap: .3rem; font-size: .64rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; }
-        .exec-ticker-item strong { color: var(--text-primary); font-weight: 900; }
-        .exec-ticker-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(var(--slate-border-rgb),.5); margin-right: .9rem; }
+    def esc(value) -> str:
+        return (
+            str(value)
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace('"', "&quot;")
+            .replace("'", "&#39;")
+        )
 
-        @keyframes execRiseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .exec-kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .6rem; margin: 0 0 1.1rem; }
-        @media (max-width: 700px) { .exec-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        .exec-flip { position: relative; height: 104px; perspective: 900px; -webkit-tap-highlight-color: transparent; animation: execRiseIn .5s var(--ease-emphasized) both; }
-        .exec-flip:nth-child(1) { animation-delay: .02s; } .exec-flip:nth-child(2) { animation-delay: .08s; }
-        .exec-flip:nth-child(3) { animation-delay: .14s; } .exec-flip:nth-child(4) { animation-delay: .2s; }
-        .exec-flip-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-        .exec-flip-label { display: block; width: 100%; height: 100%; cursor: pointer; }
-        .exec-flip-inner { position: relative; width: 100%; height: 100%; transition: transform .55s cubic-bezier(.4,.2,.2,1); transform-style: preserve-3d; }
-        .exec-flip-toggle:checked ~ .exec-flip-label .exec-flip-inner { transform: rotateY(180deg); }
-        .exec-flip-face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .22rem; text-align: center; border-radius: 12px; padding: .6rem; border: 1px solid rgba(var(--slate-border-rgb),.18); box-shadow: 0 14px 34px rgba(0,0,0,.2); }
-        .exec-flip-front { background: radial-gradient(circle at 50% 0%, rgba(var(--white-rgb),.06), transparent 46%), linear-gradient(145deg, rgba(21,36,58,.9), rgba(8,18,32,.94)); }
-        .exec-flip-back { transform: rotateY(180deg); background: radial-gradient(circle at 50% 0%, rgba(var(--accent-teal-rgb),.1), transparent 55%), linear-gradient(145deg, rgba(13,25,43,.96), rgba(8,18,32,.98)); border-color: rgba(var(--accent-teal-rgb),.32); }
-        .exec-kpi-icon { font-size: 1.2rem; }
-        .exec-kpi-label { font-size: .58rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
-        .exec-kpi-value { font-size: 1.5rem; font-weight: 900; color: var(--text-primary); }
-        .exec-kpi-back-title { font-size: .5rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-teal); }
-        .exec-kpi-back-row { font-size: .82rem; font-weight: 800; color: var(--text-primary); }
-        .exec-kpi-back-row span { display: block; font-size: .54rem; font-weight: 600; color: var(--text-secondary-dim); }
-        .exec-tap-hint { position: absolute; bottom: 4px; right: 7px; font-size: .46rem; font-weight: 800; letter-spacing: .04em; color: var(--accent-teal); opacity: .75; }
-        .exec-tap-hint::before { content: "tap"; }
+    def money(value) -> str:
+        value = float(value)
+        if abs(value) >= 1000:
+            text = f"${value / 1000:.1f}k"
+            return text.replace(".0k", "k")
+        return f"${value:,.0f}"
 
-        .exec-section { position: relative; border: 1px solid rgba(var(--slate-border-rgb),.22); border-radius: var(--radius-lg); background: var(--surface-card-gradient); margin-bottom: .65rem; overflow: hidden; animation: execRiseIn .5s var(--ease-emphasized) both; }
-        .exec-section:nth-of-type(1) { animation-delay: .26s; } .exec-section:nth-of-type(2) { animation-delay: .32s; }
-        .exec-section:nth-of-type(3) { animation-delay: .38s; } .exec-section:nth-of-type(4) { animation-delay: .44s; }
-        .exec-section-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-        .exec-section-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .8rem .95rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .exec-section-title-group { display: flex; flex-direction: column; gap: .12rem; }
-        .exec-section-name { color: var(--text-primary); font-size: .82rem; font-weight: 800; }
-        .exec-section-teaser { color: var(--text-muted); font-size: .64rem; }
-        .exec-section-chevron { color: var(--accent-teal); font-size: .78rem; transition: transform .3s var(--ease-standard); flex: 0 0 auto; }
-        .exec-section-toggle:checked ~ .exec-section-head .exec-section-chevron { transform: rotate(180deg); }
-        .exec-section-body-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .42s cubic-bezier(.3,.7,.3,1); }
-        .exec-section-toggle:checked ~ .exec-section-body-wrap { grid-template-rows: 1fr; }
-        .exec-section-body { min-height: 0; overflow: hidden; padding: 0 .95rem .95rem; }
+    def fmt(value, metric: str) -> str:
+        return money(value) if metric == "revenue" else f"{value:,.0f}"
 
-        .exec-lever-row { display: flex; gap: .4rem; margin-bottom: .8rem; }
-        .exec-lever-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-        .exec-lever-label { padding: .34rem .78rem; border-radius: 999px; border: 1px solid rgba(var(--slate-border-rgb),.3); background: rgba(var(--surface-rgb),.4); color: var(--text-muted); font-size: .6rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .2s ease, color .2s ease, border-color .2s ease; }
-        .exec-lever-toggle:checked ~ .exec-lever-label { background: linear-gradient(135deg, rgba(var(--accent-teal-rgb),.28), rgba(var(--accent-teal-rgb),.1)); color: var(--text-primary); border-color: rgba(var(--accent-teal-rgb),.55); }
-        .exec-trend-view { display: none; }
-        #trendWeekly:checked ~ .exec-trend-views #viewWeekly,
-        #trendMonthly:checked ~ .exec-trend-views #viewMonthly,
-        #trendWeekday:checked ~ .exec-trend-views #viewWeekday { display: block; }
-        .exec-bar-row { display: flex; align-items: flex-end; gap: .5rem; height: 130px; padding: 0 .1rem; }
-        .exec-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .35rem; height: 100%; justify-content: flex-end; }
-        .exec-bar-shape { width: 100%; max-width: 30px; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, var(--accent-teal), rgba(45,212,191,.35)); position: relative; }
-        .exec-bar-shape.is-record { background: linear-gradient(180deg, var(--accent-gold), rgba(245,197,66,.35)); box-shadow: 0 0 12px rgba(245,197,66,.4); }
-        .exec-bar-label { font-size: .52rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .03em; }
+    def axis_ceiling(peak: float):
+        if peak <= 0:
+            return 1, 4
+        for step in (1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 75,
+                     100, 125, 150, 200, 250, 300, 400, 500, 600, 750,
+                     1000, 1250, 1500, 2000, 2500, 3000, 4000, 5000, 7500, 10000):
+            if step * 4 >= peak:
+                return step, step * 4
+        return 25000, 100000
 
-        .exec-podium { display: flex; align-items: flex-end; gap: .5rem; margin-bottom: .9rem; }
-        .exec-podium-slot { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .7rem .4rem; border-radius: 12px 12px 0 0; border: 1px solid rgba(var(--slate-border-rgb),.24); border-bottom: none; background: linear-gradient(180deg, rgba(var(--surface-rgb),.6), rgba(var(--navy-900-rgb),.5)); }
-        .exec-podium-slot.rank-1 { padding-top: 1.1rem; border-color: rgba(var(--accent-gold-rgb),.4); }
-        .exec-podium-medal { font-size: 1.3rem; }
-        .exec-podium-name { font-size: .64rem; font-weight: 800; color: var(--text-primary); text-align: center; }
-        .exec-podium-stat { font-size: .56rem; color: var(--text-muted); }
-        .exec-rank-row { display: flex; align-items: center; gap: .6rem; padding: .5rem 0; border-top: 1px solid rgba(var(--slate-border-rgb),.14); font-size: .7rem; }
-        .exec-rank-num { color: var(--text-muted); font-weight: 800; width: 1.4rem; }
-        .exec-rank-name { flex: 1; color: var(--text-primary); font-weight: 700; }
-        .exec-rank-stat { color: var(--accent-teal); font-weight: 800; }
+    def compact(markup: str) -> str:
+        return "\n".join(line.strip() for line in markup.splitlines() if line.strip())
 
-        .exec-donut-wrap { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
-        .exec-donut { width: 128px; height: 128px; border-radius: 50%; flex: 0 0 auto; position: relative; }
-        .exec-donut::after { content: ""; position: absolute; inset: 17px; border-radius: 50%; background: var(--bg-app-2); }
-        .exec-legend { display: flex; flex-direction: column; gap: .32rem; flex: 1; min-width: 140px; }
-        .exec-legend-row { display: flex; align-items: center; gap: .4rem; font-size: .66rem; color: var(--text-secondary); }
-        .exec-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex: 0 0 auto; }
-        .exec-legend-row strong { margin-left: auto; color: var(--text-primary); }
+    plot_h, bar_max, bar_min = 132, 112, 5
 
-        .exec-milestone { margin-bottom: .8rem; }
-        .exec-milestone:last-child { margin-bottom: 0; }
-        .exec-milestone-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; }
-        .exec-milestone-name { font-size: .7rem; font-weight: 800; color: var(--text-primary); }
-        .exec-milestone-name.is-done::before { content: "\\2713  "; color: var(--accent-success); }
-        .exec-milestone-detail { font-size: .58rem; color: var(--text-muted); }
-        .exec-progress-track { height: 7px; border-radius: 999px; background: rgba(var(--slate-border-rgb),.2); overflow: hidden; }
-        .exec-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-teal), var(--accent-blue)); }
+    def chart(series, metric: str, view_id: str) -> str:
+        values = [row[metric] for row in series]
+        peak = max(values) if values else 0
+        step, top = axis_ceiling(peak)
+        grid = []
+        for level_index in range(4, -1, -1):
+            level = step * level_index
+            y = min(plot_h - 1, plot_h - round((level / top) * bar_max))
+            css_class = "exec-grid-line is-base" if level_index == 0 else "exec-grid-line"
+            grid.append(f'<div class="{css_class}" style="top:{y}px"></div>')
+            if level_index in (0, 2, 4):
+                grid.append(f'<span class="exec-grid-tag" style="top:{y}px">{esc(fmt(level, metric))}</span>')
+        bars, axis = [], []
+        for index, row in enumerate(series):
+            value = row[metric]
+            height = max(bar_min, round(value / top * bar_max)) if value > 0 else 3
+            record = " is-record" if row["is_record"] else ""
+            delay = f"{0.06 + index * 0.05:.2f}s"
+            bars.append(
+                f'<div class="exec-bar-col{record}">'
+                f'<div class="exec-bar-value">{esc(fmt(value, metric))}</div>'
+                f'<div class="exec-bar-shape{record}" style="height:{height}px;animation-delay:{delay}"></div>'
+                f"</div>"
+            )
+            axis.append(f'<span>{esc(row["label"])}</span>')
+        best = max(series, key=lambda row: row[metric]) if series else None
+        foot = ""
+        if best is not None:
+            total = sum(values)
+            average = total / len(values)
+            foot = (
+                '<div class="exec-trend-foot">'
+                f'<span>Peak <strong>{esc(best["label"])}</strong> &middot; {esc(fmt(best[metric], metric))}</span>'
+                f'<span>Average <strong>{esc(fmt(round(average), metric))}</strong></span>'
+                f'<span>Total <strong>{esc(fmt(total, metric))}</strong></span>'
+                "</div>"
+            )
+        return (
+            f'<div class="exec-trend-view" id="{view_id}">'
+            f'<div class="exec-plot">{"".join(grid)}<div class="exec-bar-row">{"".join(bars)}</div></div>'
+            f'<div class="exec-axis">{"".join(axis)}</div>{foot}</div>'
+        )
 
-        @keyframes cmdRise { from { opacity: 0; transform: var(--cmd-rest) translateY(46px) scale(.7); } to { opacity: 1; transform: var(--cmd-rest); } }
-        .cmd-deck { perspective: 1200px; display: flex; justify-content: center; align-items: flex-end; padding: .2rem 0 1.4rem; }
-        .cmd-card { position: relative; width: 88px; height: 106px; margin: 0 -15px; border-radius: 14px; border: 1px solid rgba(var(--slate-border-rgb),.3); background: linear-gradient(155deg, rgba(24,40,64,.96), rgba(8,18,32,.98)); box-shadow: 0 20px 36px rgba(0,0,0,.4), inset 0 1px 0 rgba(var(--white-rgb),.06); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .22rem; transform: var(--cmd-rest); transform-style: preserve-3d; animation: cmdRise .6s var(--ease-emphasized) both; }
-        .cmd-card:nth-child(1) { --cmd-rest: rotateY(16deg) translateY(15px) scale(.9); z-index: 1; animation-delay: .04s; border-color: rgba(var(--accent-teal-rgb),.28); }
-        .cmd-card:nth-child(2) { --cmd-rest: rotateY(7deg) translateY(4px) scale(.97); z-index: 2; animation-delay: .12s; border-color: rgba(var(--accent-blue-rgb),.3); }
-        .cmd-card:nth-child(3) { --cmd-rest: rotateY(-7deg) translateY(-6px) scale(1.03); z-index: 3; animation-delay: .2s; border-color: rgba(var(--accent-gold-rgb),.32); }
-        .cmd-card:nth-child(4) { --cmd-rest: rotateY(-17deg) translateY(-17px) scale(1.09); z-index: 4; animation-delay: .28s; border-color: rgba(var(--accent-purple),.5); box-shadow: 0 24px 42px rgba(0,0,0,.5), 0 0 30px rgba(var(--accent-teal-rgb),.15), inset 0 1px 0 rgba(var(--white-rgb),.08); }
-        .cmd-icon { font-size: 1.15rem; filter: drop-shadow(0 3px 6px rgba(0,0,0,.4)); }
-        .cmd-value { font-size: 1.28rem; font-weight: 900; color: var(--text-primary); line-height: 1; }
-        .cmd-label { font-size: .5rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--text-muted); }
-        @media (max-width: 700px) { .cmd-card { width: 74px; height: 92px; margin: 0 -11px; } .cmd-value { font-size: 1.05rem; } .cmd-icon { font-size: .95rem; } }
-        </style>
-        <div class="page-nav"><a href="?page=lab" target="_self">&larr; Lab</a><a href="?page=exec" target="_self" class="active">Executive</a></div>
-        <div class="section-kicker">DEMO DATA &middot; STRUCTURE PREVIEW</div>
-        <div class="section-title">EXECUTIVE SUMMARY</div>
-        <div class="cmd-deck">
-        <div class="cmd-card"><div class="cmd-icon">&#127937;</div><div class="cmd-value">76</div><div class="cmd-label">Events</div></div>
-        <div class="cmd-card"><div class="cmd-icon">&#129309;</div><div class="cmd-value">30</div><div class="cmd-label">Clients</div></div>
-        <div class="cmd-card"><div class="cmd-icon">&#128176;</div><div class="cmd-value">$14.3k</div><div class="cmd-label">Revenue</div></div>
-        <div class="cmd-card"><div class="cmd-icon">&#127942;</div><div class="cmd-value">A</div><div class="cmd-label">Grade</div></div>
-        </div>
-        <div class="exec-ticker"><div class="exec-ticker-track">
-        <span class="exec-ticker-item">&#127937; <strong>76</strong> CAREER EVENTS</span><span class="exec-ticker-dot"></span>
-        <span class="exec-ticker-item">&#128176; THIS WEEK <strong>$480</strong></span><span class="exec-ticker-dot"></span>
-        <span class="exec-ticker-item">&#129309; LATEST <strong>DUNKIN</strong></span><span class="exec-ticker-dot"></span>
-        <span class="exec-ticker-item">&#128293; <strong>6</strong>-DAY STREAK</span><span class="exec-ticker-dot"></span>
-        <span class="exec-ticker-item">&#127937; <strong>76</strong> CAREER EVENTS</span><span class="exec-ticker-dot"></span>
-        <span class="exec-ticker-item">&#128176; THIS WEEK <strong>$480</strong></span><span class="exec-ticker-dot"></span>
-        <span class="exec-ticker-item">&#129309; LATEST <strong>DUNKIN</strong></span><span class="exec-ticker-dot"></span>
-        <span class="exec-ticker-item">&#128293; <strong>6</strong>-DAY STREAK</span>
-        </div></div>
-        <div class="exec-kpi-grid">
-        <div class="exec-flip"><input type="checkbox" id="k1" class="exec-flip-toggle"><label for="k1" class="exec-flip-label"><div class="exec-flip-inner">
-        <div class="exec-flip-face exec-flip-front"><div class="exec-kpi-icon">&#127937;</div><div class="exec-kpi-label">Career Events</div><div class="exec-kpi-value">76</div><span class="exec-tap-hint"></span></div>
-        <div class="exec-flip-face exec-flip-back"><div class="exec-kpi-back-title">Timeline</div><div class="exec-kpi-back-row">100%<span>Completion rate</span></div><span class="exec-tap-hint"></span></div>
-        </div></label></div>
-        <div class="exec-flip"><input type="checkbox" id="k2" class="exec-flip-toggle"><label for="k2" class="exec-flip-label"><div class="exec-flip-inner">
-        <div class="exec-flip-face exec-flip-front"><div class="exec-kpi-icon">&#128176;</div><div class="exec-kpi-label">Revenue</div><div class="exec-kpi-value">$14.3k</div><span class="exec-tap-hint"></span></div>
-        <div class="exec-flip-face exec-flip-back"><div class="exec-kpi-back-title">Per Event</div><div class="exec-kpi-back-row">$188<span>Average confirmed</span></div><span class="exec-tap-hint"></span></div>
-        </div></label></div>
-        <div class="exec-flip"><input type="checkbox" id="k3" class="exec-flip-toggle"><label for="k3" class="exec-flip-label"><div class="exec-flip-inner">
-        <div class="exec-flip-face exec-flip-front"><div class="exec-kpi-icon">&#129309;</div><div class="exec-kpi-label">Clients</div><div class="exec-kpi-value">30</div><span class="exec-tap-hint"></span></div>
-        <div class="exec-flip-face exec-flip-back"><div class="exec-kpi-back-title">Mix</div><div class="exec-kpi-back-row">20<span>Repeat &middot; 10 first-time</span></div><span class="exec-tap-hint"></span></div>
-        </div></label></div>
-        <div class="exec-flip"><input type="checkbox" id="k4" class="exec-flip-toggle"><label for="k4" class="exec-flip-label"><div class="exec-flip-inner">
-        <div class="exec-flip-face exec-flip-front"><div class="exec-kpi-icon">&#128293;</div><div class="exec-kpi-label">Streak</div><div class="exec-kpi-value">6</div><span class="exec-tap-hint"></span></div>
-        <div class="exec-flip-face exec-flip-back"><div class="exec-kpi-back-title">Best Ever</div><div class="exec-kpi-back-row">14<span>Longest streak</span></div><span class="exec-tap-hint"></span></div>
-        </div></label></div>
-        </div>
-        <div class="exec-section">
-        <input type="checkbox" id="secTrend" class="exec-section-toggle" checked>
-        <label for="secTrend" class="exec-section-head"><div class="exec-section-title-group"><div class="exec-section-name">Performance Trends</div><div class="exec-section-teaser">Weekly / Monthly / Weekday &middot; toggle below</div></div><span class="exec-section-chevron">&#9662;</span></label>
-        <div class="exec-section-body-wrap"><div class="exec-section-body">
-        <div class="exec-trend-panel">
-        <input type="radio" name="trendview" id="trendWeekly" class="exec-lever-toggle" checked><label for="trendWeekly" class="exec-lever-label" style="margin-right:.4rem;display:inline-block;">Weekly</label>
-        <input type="radio" name="trendview" id="trendMonthly" class="exec-lever-toggle"><label for="trendMonthly" class="exec-lever-label" style="margin-right:.4rem;display:inline-block;">Monthly</label>
-        <input type="radio" name="trendview" id="trendWeekday" class="exec-lever-toggle"><label for="trendWeekday" class="exec-lever-label" style="display:inline-block;">Weekday</label>
-        <div class="exec-trend-views" style="margin-top:.8rem;">
-        <div class="exec-trend-view" id="viewWeekly"><div class="exec-bar-row">
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:38%"></div><div class="exec-bar-label">W1</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:52%"></div><div class="exec-bar-label">W2</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape is-record" style="height:100%"></div><div class="exec-bar-label">W3</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:64%"></div><div class="exec-bar-label">W4</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:71%"></div><div class="exec-bar-label">W5</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:58%"></div><div class="exec-bar-label">W6</div></div>
-        </div></div>
-        <div class="exec-trend-view" id="viewMonthly"><div class="exec-bar-row">
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:45%"></div><div class="exec-bar-label">APR</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:68%"></div><div class="exec-bar-label">MAY</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:82%"></div><div class="exec-bar-label">JUN</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape is-record" style="height:100%"></div><div class="exec-bar-label">JUL</div></div>
-        </div></div>
-        <div class="exec-trend-view" id="viewWeekday"><div class="exec-bar-row">
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:30%"></div><div class="exec-bar-label">MON</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape is-record" style="height:100%"></div><div class="exec-bar-label">TUE</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:74%"></div><div class="exec-bar-label">WED</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:56%"></div><div class="exec-bar-label">THU</div></div>
-        <div class="exec-bar-col"><div class="exec-bar-shape" style="height:81%"></div><div class="exec-bar-label">FRI</div></div>
-        </div></div>
-        </div></div>
-        </div></div></div>
-        <div class="exec-section">
-        <input type="checkbox" id="secClients" class="exec-section-toggle">
-        <label for="secClients" class="exec-section-head"><div class="exec-section-title-group"><div class="exec-section-name">Client Leaderboard</div><div class="exec-section-teaser">Macy's leads at 12 events</div></div><span class="exec-section-chevron">&#9662;</span></label>
-        <div class="exec-section-body-wrap"><div class="exec-section-body">
-        <div class="exec-podium">
-        <div class="exec-podium-slot rank-2"><div class="exec-podium-medal">&#129352;</div><div class="exec-podium-name">Bloomingdale's</div><div class="exec-podium-stat">9 events</div></div>
-        <div class="exec-podium-slot rank-1"><div class="exec-podium-medal">&#129351;</div><div class="exec-podium-name">Macy's</div><div class="exec-podium-stat">12 events</div></div>
-        <div class="exec-podium-slot rank-3"><div class="exec-podium-medal">&#129353;</div><div class="exec-podium-name">Hampton Inn</div><div class="exec-podium-stat">7 events</div></div>
-        </div>
-        <div class="exec-rank-row"><span class="exec-rank-num">4</span><span class="exec-rank-name">Davis Polk &amp; Wardwell</span><span class="exec-rank-stat">6 &middot; $980</span></div>
-        <div class="exec-rank-row"><span class="exec-rank-num">5</span><span class="exec-rank-name">Dunkin</span><span class="exec-rank-stat">5 &middot; $720</span></div>
-        </div></div></div>
-        <div class="exec-section">
-        <input type="checkbox" id="secTerritory" class="exec-section-toggle">
-        <label for="secTerritory" class="exec-section-head"><div class="exec-section-title-group"><div class="exec-section-name">Territory &amp; Sectors</div><div class="exec-section-teaser">5 sectors &middot; Retail leads at 42%</div></div><span class="exec-section-chevron">&#9662;</span></label>
-        <div class="exec-section-body-wrap"><div class="exec-section-body">
-        <div class="exec-donut-wrap">
-        <div class="exec-donut" style="background:conic-gradient(var(--accent-coral) 0% 42%, var(--accent-blue) 42% 66%, var(--accent-gold) 66% 84%, var(--accent-purple) 84% 94%, var(--accent-success) 94% 100%);"></div>
-        <div class="exec-legend">
-        <div class="exec-legend-row"><span class="exec-legend-dot" style="background:var(--accent-coral)"></span>Retail<strong>42%</strong></div>
-        <div class="exec-legend-row"><span class="exec-legend-dot" style="background:var(--accent-blue)"></span>Hospitality<strong>24%</strong></div>
-        <div class="exec-legend-row"><span class="exec-legend-dot" style="background:var(--accent-gold)"></span>Legal<strong>18%</strong></div>
-        <div class="exec-legend-row"><span class="exec-legend-dot" style="background:var(--accent-purple)"></span>Government<strong>10%</strong></div>
-        <div class="exec-legend-row"><span class="exec-legend-dot" style="background:var(--accent-success)"></span>Food Service<strong>6%</strong></div>
-        </div></div>
-        </div></div></div>
-        <div class="exec-section">
-        <input type="checkbox" id="secFame" class="exec-section-toggle">
-        <label for="secFame" class="exec-section-head"><div class="exec-section-title-group"><div class="exec-section-name">Hall of Fame</div><div class="exec-section-teaser">3 achieved &middot; 1 in progress</div></div><span class="exec-section-chevron">&#9662;</span></label>
-        <div class="exec-section-body-wrap"><div class="exec-section-body">
-        <div class="exec-milestone"><div class="exec-milestone-head"><span class="exec-milestone-name is-done">First 50 Events</span><span class="exec-milestone-detail">Achieved</span></div><div class="exec-progress-track"><div class="exec-progress-fill" style="width:100%"></div></div></div>
-        <div class="exec-milestone"><div class="exec-milestone-head"><span class="exec-milestone-name is-done">5 Jurisdictions</span><span class="exec-milestone-detail">Achieved</span></div><div class="exec-progress-track"><div class="exec-progress-fill" style="width:100%"></div></div></div>
-        <div class="exec-milestone"><div class="exec-milestone-head"><span class="exec-milestone-name is-done">10-Day Streak</span><span class="exec-milestone-detail">Achieved</span></div><div class="exec-progress-track"><div class="exec-progress-fill" style="width:100%"></div></div></div>
-        <div class="exec-milestone"><div class="exec-milestone-head"><span class="exec-milestone-name">$25,000 Career Revenue</span><span class="exec-milestone-detail">$14.3k of $25k</span></div><div class="exec-progress-track"><div class="exec-progress-fill" style="width:57%"></div></div></div>
-        </div></div></div>
-        """,
-        unsafe_allow_html=True,
+    weekly, monthly, weekday = d["weekly"], d["monthly"], d["weekday"]
+    clients, sectors = d["clients"], d["milestones"] and d["sectors"]
+    top_client = clients[0]
+    best_month = max(monthly, key=lambda row: row["events"])
+    avg_per_event = round(d["career_revenue"] / max(1, d["career_events"]))
+    repeat_rate = round(d["repeat_clients"] / max(1, d["unique_clients"]) * 100)
+    month_delta = monthly[-1]["events"] - monthly[-2]["events"] if len(monthly) > 1 else 0
+    achieved = sum(1 for m in d["milestones"] if m["done"])
+    in_progress = len(d["milestones"]) - achieved
+
+    spark_w, spark_h = 320.0, 44.0
+    spark_values = [row["revenue"] for row in weekly]
+    low, high = min(spark_values), max(spark_values)
+    span = (high - low) or 1
+    points = []
+    for index, value in enumerate(spark_values):
+        x = (spark_w * index / (len(spark_values) - 1)) if len(spark_values) > 1 else spark_w / 2
+        y = spark_h - 4 - ((value - low) / span) * (spark_h - 11)
+        points.append((round(x, 1), round(y, 1)))
+    spark_line = " ".join(f"{x},{y}" for x, y in points)
+    spark_area = f"{points[0][0]},{spark_h} {spark_line} {points[-1][0]},{spark_h}"
+    last_x, last_y = points[-1]
+
+    stops, running = [], 0
+    for sector in sectors:
+        stops.append(f'{sector["color"]} {running}% {running + sector["pct"]}%')
+        running += sector["pct"]
+    donut = f"conic-gradient(from -90deg, {', '.join(stops)})"
+
+    css = """
+<style>
+.page-nav { display: flex; gap: .5rem; margin-bottom: .8rem; }
+.page-nav a { color: var(--text-muted) !important; text-decoration: none !important; font-size: .68rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: .4rem .8rem; border-radius: 999px; border: 1px solid rgba(var(--slate-border-rgb),.28); transition: color .18s ease, border-color .18s ease; }
+.page-nav a:hover { color: var(--text-primary) !important; border-color: rgba(var(--accent-teal-rgb),.5); }
+.page-nav a.active { color: var(--accent-teal) !important; border-color: rgba(var(--accent-teal-rgb),.5); }
+@keyframes execRiseIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes execAuraDrift { from { transform: translate3d(-7%, 0, 0) scale(1.04); } to { transform: translate3d(7%, 0, 0) scale(1.16); } }
+@keyframes execPulse { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.55); } }
+@keyframes execSparkDraw { from { stroke-dashoffset: 900; } to { stroke-dashoffset: 0; } }
+@keyframes execBarGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes execTickerScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.exec-hero { position: relative; overflow: hidden; border-radius: 22px; border: 1px solid rgba(var(--slate-border-rgb),.22); margin: 0 0 .9rem; background: radial-gradient(120% 140% at 10% -15%, rgba(var(--accent-teal-rgb),.17), transparent 55%), radial-gradient(95% 130% at 100% 0%, rgba(var(--accent-blue-rgb),.14), transparent 62%), linear-gradient(165deg, rgba(16,29,49,.96), rgba(6,13,24,.985)); box-shadow: 0 26px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(var(--white-rgb),.06); animation: execRiseIn .55s var(--ease-emphasized) both; }
+.exec-hero-aura { position: absolute; left: -25%; right: -25%; top: -60%; height: 200%; pointer-events: none; opacity: .85; background: radial-gradient(closest-side, rgba(var(--accent-teal-rgb),.2), transparent 72%); animation: execAuraDrift 15s ease-in-out infinite alternate; }
+.exec-hero-mesh { position: absolute; inset: 0; pointer-events: none; opacity: .45; background-image: linear-gradient(rgba(var(--slate-border-rgb),.09) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--slate-border-rgb),.09) 1px, transparent 1px); background-size: 34px 34px; -webkit-mask-image: radial-gradient(125% 95% at 50% 0%, #000 18%, transparent 80%); mask-image: radial-gradient(125% 95% at 50% 0%, #000 18%, transparent 80%); }
+.exec-hero-inner { position: relative; z-index: 2; padding: 1rem 1.05rem 1.1rem; }
+.exec-hero-radio { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.exec-hero-top { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.exec-hero-eyebrow { display: inline-flex; align-items: center; gap: .42rem; font-size: .56rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: var(--text-tertiary); }
+.exec-hero-pulse { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; background: var(--accent-teal); box-shadow: 0 0 10px rgba(var(--accent-teal-rgb),.9); animation: execPulse 2.4s ease-in-out infinite; }
+.exec-hero-badge { display: inline-flex; align-items: center; gap: .3rem; padding: .26rem .55rem; border-radius: 999px; white-space: nowrap; border: 1px solid rgba(var(--accent-gold-rgb),.45); background: rgba(var(--accent-gold-rgb),.12); color: var(--accent-gold-pale); font-size: .53rem; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+.exec-hero-stage { position: relative; min-height: 112px; display: flex; align-items: flex-end; margin: .5rem 0 .2rem; }
+.exec-hero-figure { display: none; width: 100%; align-items: flex-end; gap: .55rem; }
+#figEvents { display: flex; }
+#heroRevenue:checked ~ .exec-hero-stage #figEvents, #heroClients:checked ~ .exec-hero-stage #figEvents { display: none; }
+#heroEvents:checked ~ .exec-hero-stage #figEvents { display: flex; }
+#heroRevenue:checked ~ .exec-hero-stage #figRevenue { display: flex; }
+#heroClients:checked ~ .exec-hero-stage #figClients { display: flex; }
+.exec-hero-numwrap { flex: 0 0 auto; filter: drop-shadow(0 12px 26px rgba(var(--accent-teal-rgb),.24)); }
+.exec-hero-number { display: block; font-family: "Inter", "SF Pro Display", "Segoe UI", Arial, sans-serif; font-size: clamp(3.5rem, 21vw, 6.2rem); font-weight: 900; line-height: .8; letter-spacing: -.055em; color: var(--text-primary); }
+.exec-hero-number.is-wide { font-size: clamp(2.5rem, 14vw, 4.6rem); letter-spacing: -.045em; }
+@supports (-webkit-background-clip: text) { .exec-hero-number { background-image: linear-gradient(168deg, #ffffff 4%, var(--accent-teal-hover) 44%, var(--accent-teal) 74%, var(--accent-blue) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; } }
+.exec-hero-meta { display: flex; flex-direction: column; gap: .16rem; padding-bottom: .5rem; min-width: 0; }
+.exec-hero-unit { font-size: .78rem; font-weight: 900; letter-spacing: .01em; color: var(--text-secondary-bright); }
+.exec-hero-sub { font-size: .58rem; font-weight: 600; line-height: 1.35; color: var(--text-muted); }
+.exec-hero-delta { display: inline-flex; align-self: flex-start; align-items: center; gap: .25rem; margin-top: .28rem; padding: .18rem .45rem; border-radius: 6px; font-size: .54rem; font-weight: 900; letter-spacing: .04em; border: 1px solid rgba(var(--accent-success-rgb),.3); background: rgba(var(--accent-success-rgb),.13); color: var(--accent-success); }
+.exec-hero-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .28rem; padding: .25rem; margin: .55rem 0 .8rem; border-radius: 12px; border: 1px solid rgba(var(--slate-border-rgb),.2); background: rgba(var(--navy-900-rgb),.55); }
+.exec-hero-seg-btn { display: block; text-align: center; padding: .42rem .2rem; border-radius: 9px; cursor: pointer; -webkit-tap-highlight-color: transparent; font-size: .57rem; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); background: transparent; box-shadow: 0 0 0 0 rgba(var(--accent-teal-rgb),0); transition: background .24s var(--ease-standard), color .24s var(--ease-standard), box-shadow .24s var(--ease-standard); }
+#heroEvents:checked ~ .exec-hero-seg label[for="heroEvents"], #heroRevenue:checked ~ .exec-hero-seg label[for="heroRevenue"], #heroClients:checked ~ .exec-hero-seg label[for="heroClients"] { background: linear-gradient(135deg, rgba(var(--accent-teal-rgb),.3), rgba(var(--accent-teal-rgb),.1)); color: var(--text-primary); box-shadow: 0 0 0 1px rgba(var(--accent-teal-rgb),.45); }
+.exec-hero-spark { display: block; width: 100%; height: 46px; overflow: visible; }
+.exec-spark-line { fill: none; stroke: var(--accent-teal); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 900; stroke-dashoffset: 0; animation: execSparkDraw 1.4s var(--ease-emphasized) .2s both; }
+.exec-spark-tick { stroke: var(--accent-teal-hover); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.exec-spark-caption { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: .1rem 0 .8rem; font-size: .53rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.exec-spark-caption strong { color: var(--accent-teal); font-weight: 900; }
+.exec-hero-rail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(var(--slate-border-rgb),.18); padding-top: .75rem; }
+.exec-hero-cell { position: relative; display: flex; flex-direction: column; align-items: center; gap: .18rem; padding: 0 .25rem; min-width: 0; }
+.exec-hero-cell + .exec-hero-cell::before { content: ""; position: absolute; left: 0; top: 8%; bottom: 8%; width: 1px; background: rgba(var(--slate-border-rgb),.18); }
+.exec-hero-cell-val { font-size: 1.02rem; font-weight: 900; line-height: 1; color: var(--text-primary); text-align: center; }
+.exec-hero-cell-lab { font-size: .49rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--text-muted); text-align: center; }
+.exec-kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .55rem; margin: 0 0 1rem; }
+@media (max-width: 700px) { .exec-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.exec-flip { position: relative; height: 100px; perspective: 900px; -webkit-tap-highlight-color: transparent; animation: execRiseIn .5s var(--ease-emphasized) both; }
+.exec-flip-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.exec-flip-label { display: block; width: 100%; height: 100%; cursor: pointer; }
+.exec-flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transform: rotateY(0deg); transition: transform .55s cubic-bezier(.4,.2,.2,1); }
+.exec-flip-toggle:checked ~ .exec-flip-label .exec-flip-inner { transform: rotateY(180deg); }
+.exec-flip-face { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; -webkit-backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; text-align: center; border-radius: 12px; padding: .55rem; border: 1px solid rgba(var(--slate-border-rgb),.18); box-shadow: 0 14px 34px rgba(0,0,0,.2); }
+.exec-flip-front { background: radial-gradient(circle at 50% 0%, rgba(var(--white-rgb),.06), transparent 46%), linear-gradient(145deg, rgba(21,36,58,.9), rgba(8,18,32,.94)); }
+.exec-flip-back { transform: rotateY(180deg); border-color: rgba(var(--accent-teal-rgb),.32); background: radial-gradient(circle at 50% 0%, rgba(var(--accent-teal-rgb),.1), transparent 55%), linear-gradient(145deg, rgba(13,25,43,.96), rgba(8,18,32,.98)); }
+.exec-kpi-icon { font-size: 1.1rem; }
+.exec-kpi-label { font-size: .55rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted); }
+.exec-kpi-value { font-size: 1.35rem; font-weight: 900; line-height: 1.05; color: var(--text-primary); }
+.exec-kpi-value.is-text { font-size: .92rem; }
+.exec-kpi-back-title { font-size: .49rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--accent-teal); }
+.exec-kpi-back-row { font-size: .8rem; font-weight: 800; color: var(--text-primary); }
+.exec-kpi-back-row span { display: block; font-size: .53rem; font-weight: 600; color: var(--text-secondary-dim); }
+.exec-tap-hint { position: absolute; bottom: 4px; right: 7px; font-size: .45rem; font-weight: 800; letter-spacing: .04em; color: var(--accent-teal); opacity: .75; }
+.exec-tap-hint::before { content: "tap"; }
+.exec-section { position: relative; overflow: hidden; border: 1px solid rgba(var(--slate-border-rgb),.22); border-radius: var(--radius-lg); background: var(--surface-card-gradient); margin-bottom: .65rem; animation: execRiseIn .5s var(--ease-emphasized) both; }
+.exec-section-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.exec-section-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .8rem .95rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.exec-section-title-group { display: flex; flex-direction: column; gap: .12rem; min-width: 0; }
+.exec-section-name { color: var(--text-primary); font-size: .82rem; font-weight: 800; }
+.exec-section-teaser { color: var(--text-muted); font-size: .63rem; }
+.exec-section-chevron { flex: 0 0 auto; color: var(--accent-teal); font-size: .78rem; transform: rotate(0deg); transition: transform .3s var(--ease-standard); }
+.exec-section-toggle:checked ~ .exec-section-head .exec-section-chevron { transform: rotate(180deg); }
+.exec-section-body-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .42s cubic-bezier(.3,.7,.3,1); }
+.exec-section-toggle:checked ~ .exec-section-body-wrap { grid-template-rows: 1fr; }
+.exec-section-body { min-height: 0; overflow: hidden; padding: 0 .95rem .95rem; }
+.exec-trend-panel { position: relative; }
+.exec-lever-toggle { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.exec-lever-row { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .4rem; }
+.exec-lever-row.is-metric { margin-bottom: .85rem; }
+.exec-lever-label { display: inline-block; padding: .32rem .74rem; border-radius: 999px; cursor: pointer; -webkit-tap-highlight-color: transparent; border: 1px solid rgba(var(--slate-border-rgb),.3); background: rgba(var(--surface-rgb),.4); color: var(--text-muted); font-size: .58rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; transition: background .22s var(--ease-standard), color .22s var(--ease-standard), border-color .22s var(--ease-standard); }
+#trendWeekly:checked ~ .exec-lever-row label[for="trendWeekly"], #trendMonthly:checked ~ .exec-lever-row label[for="trendMonthly"], #trendWeekday:checked ~ .exec-lever-row label[for="trendWeekday"], #metEvents:checked ~ .exec-lever-row label[for="metEvents"], #metRevenue:checked ~ .exec-lever-row label[for="metRevenue"] { background: linear-gradient(135deg, rgba(var(--accent-teal-rgb),.28), rgba(var(--accent-teal-rgb),.1)); color: var(--text-primary); border-color: rgba(var(--accent-teal-rgb),.55); }
+.exec-trend-view { display: none; }
+#viewWeeklyEvents { display: block; }
+#trendMonthly:checked ~ .exec-trend-views #viewWeeklyEvents, #trendWeekday:checked ~ .exec-trend-views #viewWeeklyEvents, #metRevenue:checked ~ .exec-trend-views #viewWeeklyEvents { display: none; }
+#trendWeekly:checked ~ #metEvents:checked ~ .exec-trend-views #viewWeeklyEvents, #trendWeekly:checked ~ #metRevenue:checked ~ .exec-trend-views #viewWeeklyRevenue, #trendMonthly:checked ~ #metEvents:checked ~ .exec-trend-views #viewMonthlyEvents, #trendMonthly:checked ~ #metRevenue:checked ~ .exec-trend-views #viewMonthlyRevenue, #trendWeekday:checked ~ #metEvents:checked ~ .exec-trend-views #viewWeekdayEvents, #trendWeekday:checked ~ #metRevenue:checked ~ .exec-trend-views #viewWeekdayRevenue { display: block; }
+.exec-plot { position: relative; height: 132px; padding-left: 32px; }
+.exec-grid-line { position: absolute; left: 32px; right: 0; height: 1px; background: rgba(var(--slate-border-rgb),.13); }
+.exec-grid-line.is-base { background: rgba(var(--slate-border-rgb),.34); }
+.exec-grid-tag { position: absolute; left: 0; width: 28px; text-align: right; transform: translateY(-50%); font-size: .45rem; font-weight: 800; letter-spacing: .02em; color: var(--text-muted-alt2); }
+.exec-bar-row { position: absolute; left: 32px; right: 0; top: 0; bottom: 0; display: flex; align-items: flex-end; gap: .38rem; }
+.exec-bar-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: .2rem; }
+.exec-bar-value { font-size: .5rem; font-weight: 900; line-height: 1.1; white-space: nowrap; color: var(--text-secondary); }
+.exec-bar-col.is-record .exec-bar-value { color: var(--accent-gold-pale); }
+.exec-bar-col.is-record .exec-bar-value::before { content: "\\2605 "; }
+.exec-bar-shape { width: 100%; max-width: 30px; border-radius: 6px 6px 2px 2px; transform-origin: bottom center; transform: scaleY(1); background: linear-gradient(180deg, var(--accent-teal), rgba(var(--accent-teal-rgb),.3)); box-shadow: inset 0 0 0 1px rgba(var(--accent-teal-rgb),.2); animation: execBarGrow .55s var(--ease-emphasized) both; }
+.exec-bar-shape.is-record { background: linear-gradient(180deg, var(--accent-gold), rgba(var(--accent-gold-rgb),.32)); box-shadow: 0 0 14px rgba(var(--accent-gold-rgb),.35); }
+.exec-axis { display: flex; gap: .38rem; margin-top: .4rem; padding-left: 32px; }
+.exec-axis span { flex: 1 1 0; min-width: 0; text-align: center; font-size: .52rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--text-muted); }
+.exec-trend-foot { display: flex; flex-wrap: wrap; gap: .3rem .9rem; margin-top: .7rem; padding-top: .6rem; border-top: 1px solid rgba(var(--slate-border-rgb),.14); font-size: .57rem; color: var(--text-muted); }
+.exec-trend-foot strong { color: var(--text-primary); font-weight: 800; }
+.exec-podium { display: flex; align-items: flex-end; gap: .45rem; margin-bottom: .85rem; }
+.exec-podium-slot { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: .22rem; padding: .55rem .3rem .5rem; border-radius: 12px 12px 0 0; border: 1px solid rgba(var(--slate-border-rgb),.24); border-bottom: 2px solid rgba(var(--slate-border-rgb),.3); background: linear-gradient(180deg, rgba(var(--surface-rgb),.7), rgba(var(--navy-900-rgb),.5)); }
+.exec-podium-slot.rank-1 { border-color: rgba(var(--accent-gold-rgb),.42); border-bottom-color: rgba(var(--accent-gold-rgb),.5); box-shadow: 0 0 26px rgba(var(--accent-gold-rgb),.12); }
+.exec-podium-medal { font-size: 1.25rem; }
+.exec-podium-name { font-size: .61rem; font-weight: 800; color: var(--text-primary); text-align: center; line-height: 1.2; }
+.exec-podium-stat { font-size: .55rem; color: var(--text-muted); text-align: center; }
+.exec-rank-row { display: grid; grid-template-columns: 1.15rem 1fr auto; align-items: center; gap: .55rem; padding: .48rem 0; border-top: 1px solid rgba(var(--slate-border-rgb),.14); }
+.exec-rank-num { font-size: .66rem; font-weight: 800; color: var(--text-muted); }
+.exec-rank-main { min-width: 0; }
+.exec-rank-name { font-size: .7rem; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exec-rank-track { height: 4px; margin-top: .3rem; border-radius: 999px; overflow: hidden; background: rgba(var(--slate-border-rgb),.18); }
+.exec-rank-fill { height: 4px; border-radius: 999px; background: linear-gradient(90deg, var(--accent-teal), var(--accent-blue)); }
+.exec-rank-stat { font-size: .64rem; font-weight: 800; color: var(--accent-teal); white-space: nowrap; }
+.exec-donut-wrap { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.exec-donut { position: relative; width: 132px; height: 132px; border-radius: 50%; flex: 0 0 auto; }
+.exec-donut::after { content: ""; position: absolute; inset: 20px; border-radius: 50%; background: linear-gradient(160deg, rgba(16,29,49,.99), rgba(8,17,31,1)); }
+.exec-donut-core { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .05rem; }
+.exec-donut-core-val { font-size: 1.15rem; font-weight: 900; line-height: 1; color: var(--text-primary); }
+.exec-donut-core-lab { font-size: .46rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); }
+.exec-legend { display: flex; flex-direction: column; gap: .34rem; flex: 1 1 150px; min-width: 150px; }
+.exec-legend-row { display: flex; align-items: center; gap: .45rem; font-size: .66rem; color: var(--text-secondary); }
+.exec-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex: 0 0 auto; }
+.exec-legend-row strong { margin-left: auto; color: var(--text-primary); font-weight: 800; }
+.exec-milestone { margin-bottom: .8rem; }
+.exec-milestone:last-child { margin-bottom: 0; }
+.exec-milestone-head { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-bottom: .3rem; }
+.exec-milestone-name { font-size: .69rem; font-weight: 800; color: var(--text-primary); }
+.exec-milestone-name.is-done::before { content: "\\2713  "; color: var(--accent-success); }
+.exec-milestone-detail { font-size: .57rem; color: var(--text-muted); white-space: nowrap; }
+.exec-progress-track { height: 7px; border-radius: 999px; overflow: hidden; background: rgba(var(--slate-border-rgb),.2); }
+.exec-progress-fill { height: 7px; border-radius: 999px; background: linear-gradient(90deg, var(--accent-teal), var(--accent-blue)); }
+.exec-progress-fill.is-done { background: linear-gradient(90deg, var(--accent-success), var(--accent-teal)); }
+.exec-ticker { position: relative; overflow: hidden; height: 36px; display: flex; align-items: center; margin: 0 0 1rem; border-radius: var(--radius-md); border: 1px solid rgba(var(--slate-border-rgb),.24); background: linear-gradient(90deg, rgba(var(--navy-900-rgb),.7), rgba(var(--surface-rgb),.5)); }
+.exec-ticker::before, .exec-ticker::after { content: ""; position: absolute; top: 0; bottom: 0; width: 24px; z-index: 1; pointer-events: none; }
+.exec-ticker::before { left: 0; background: linear-gradient(90deg, rgba(var(--navy-900-rgb),.9), transparent); }
+.exec-ticker::after { right: 0; background: linear-gradient(270deg, rgba(var(--navy-900-rgb),.9), transparent); }
+.exec-ticker-track { display: flex; align-items: center; gap: 1.8rem; width: max-content; padding: 0 1rem; animation: execTickerScroll 24s linear infinite; }
+.exec-ticker-item { flex: 0 0 auto; display: flex; align-items: center; gap: .3rem; white-space: nowrap; font-size: .62rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--text-secondary); }
+.exec-ticker-item strong { color: var(--text-primary); font-weight: 900; }
+@media (prefers-reduced-motion: reduce) { .exec-hero, .exec-hero-aura, .exec-hero-pulse, .exec-flip, .exec-section, .exec-bar-shape, .exec-spark-line, .exec-ticker-track { animation: none !important; } }
+</style>
+"""
+
+    ticker_items = [
+        f'&#127937; <strong>{d["career_events"]}</strong> career events',
+        f'&#128176; career <strong>{money(d["career_revenue"])}</strong>',
+        f'&#129309; <strong>{d["unique_clients"]}</strong> clients &middot; {repeat_rate}% repeat',
+        f'&#128293; <strong>{d["current_streak"]}</strong>-day streak',
+        f'&#127942; best month <strong>{esc(best_month["label"])}</strong> &middot; {best_month["events"]} events',
+    ]
+    ticker = "".join(f'<span class="exec-ticker-item">{item}</span>' for item in ticker_items * 2)
+
+    figures = [
+        ("figEvents", f'{d["career_events"]}', "", "Events worked",
+         "Career total across every jurisdiction",
+         f'&#9650; +{month_delta} vs last month' if month_delta > 0 else f'{month_delta} vs last month'),
+        ("figRevenue", money(d["career_revenue"]), " is-wide", "Revenue booked",
+         f'{money(avg_per_event)} average per event',
+         f'&#9650; {money(monthly[-1]["revenue"])} this month'),
+        ("figClients", f'{d["unique_clients"]}', "", "Client roster",
+         f'{d["repeat_clients"]} repeat &middot; {d["first_time_clients"]} first-time',
+         f'&#9650; {repeat_rate}% come back'),
+    ]
+    figure_html = "".join(
+        f'<div class="exec-hero-figure" id="{fid}">'
+        f'<div class="exec-hero-numwrap"><span class="exec-hero-number{wide}">{value}</span></div>'
+        f'<div class="exec-hero-meta"><div class="exec-hero-unit">{unit}</div>'
+        f'<div class="exec-hero-sub">{sub}</div><span class="exec-hero-delta">{delta}</span></div></div>'
+        for fid, value, wide, unit, sub, delta in figures
     )
 
+    rail = [
+        (f'{d["current_streak"]}', "Day streak"),
+        (esc(best_month["label"]), "Best month"),
+        (money(avg_per_event), "Avg / event"),
+    ]
+    rail_html = "".join(
+        f'<div class="exec-hero-cell"><div class="exec-hero-cell-val">{value}</div>'
+        f'<div class="exec-hero-cell-lab">{label}</div></div>'
+        for value, label in rail
+    )
+
+    hero = (
+        '<div class="exec-hero"><div class="exec-hero-aura"></div><div class="exec-hero-mesh"></div>'
+        '<div class="exec-hero-inner">'
+        '<input type="radio" name="heroMetric" id="heroEvents" class="exec-hero-radio" checked>'
+        '<input type="radio" name="heroMetric" id="heroRevenue" class="exec-hero-radio">'
+        '<input type="radio" name="heroMetric" id="heroClients" class="exec-hero-radio">'
+        '<div class="exec-hero-top"><div class="exec-hero-eyebrow"><span class="exec-hero-pulse"></span>Career to date</div>'
+        f'<div class="exec-hero-badge">&#9733; {esc(best_month["label"])} record month</div></div>'
+        f'<div class="exec-hero-stage">{figure_html}</div>'
+        '<div class="exec-hero-seg">'
+        '<label for="heroEvents" class="exec-hero-seg-btn">Events</label>'
+        '<label for="heroRevenue" class="exec-hero-seg-btn">Revenue</label>'
+        '<label for="heroClients" class="exec-hero-seg-btn">Clients</label></div>'
+        f'<svg class="exec-hero-spark" viewBox="0 0 {int(spark_w)} {int(spark_h)}" preserveAspectRatio="none" aria-hidden="true">'
+        '<defs><linearGradient id="execSparkFill" x1="0" y1="0" x2="0" y2="1">'
+        '<stop offset="0%" stop-color="rgba(45,212,191,.34)"></stop>'
+        '<stop offset="100%" stop-color="rgba(45,212,191,0)"></stop></linearGradient></defs>'
+        f'<polygon points="{spark_area}" fill="url(#execSparkFill)"></polygon>'
+        f'<polyline class="exec-spark-line" points="{spark_line}"></polyline>'
+        f'<line class="exec-spark-tick" x1="{last_x}" y1="{last_y}" x2="{last_x}" y2="{spark_h}"></line></svg>'
+        f'<div class="exec-spark-caption"><span>Revenue &middot; last {len(weekly)} weeks</span>'
+        f'<span>Latest <strong>{money(weekly[-1]["revenue"])}</strong></span></div>'
+        f'<div class="exec-hero-rail">{rail_html}</div>'
+        "</div></div>"
+    )
+
+    kpis = [
+        ("k1", "&#128200;", "Repeat Rate", f"{repeat_rate}%", "Loyalty",
+         f'{d["repeat_clients"]}', f'of {d["unique_clients"]} clients returned'),
+        ("k2", "&#128506;", "Sectors", f'{len(sectors)}', "Widest",
+         esc(sectors[0]["name"]), f'{sectors[0]["pct"]}% of all events'),
+        ("k3", "&#128293;", "Best Streak", f'{d["best_streak"]}', "Current",
+         f'{d["current_streak"]} days', "consecutive working days"),
+        ("k4", "&#127942;", "Top Client", esc(top_client["name"]), "Booked",
+         f'{top_client["events"]}', f'events &middot; {money(top_client["revenue"])}'),
+    ]
+    kpi_html = "".join(
+        f'<div class="exec-flip" style="animation-delay:{0.04 + index * 0.06:.2f}s">'
+        f'<input type="checkbox" id="{cid}" class="exec-flip-toggle">'
+        f'<label for="{cid}" class="exec-flip-label"><div class="exec-flip-inner">'
+        f'<div class="exec-flip-face exec-flip-front"><div class="exec-kpi-icon">{icon}</div>'
+        f'<div class="exec-kpi-label">{label}</div>'
+        f'<div class="exec-kpi-value{" is-text" if not str(value)[:1].isdigit() and not str(value)[:1] == "$" else ""}">{value}</div>'
+        f'<span class="exec-tap-hint"></span></div>'
+        f'<div class="exec-flip-face exec-flip-back"><div class="exec-kpi-back-title">{back_title}</div>'
+        f'<div class="exec-kpi-back-row">{back_value}<span>{back_sub}</span></div>'
+        f'<span class="exec-tap-hint"></span></div></div></label></div>'
+        for index, (cid, icon, label, value, back_title, back_value, back_sub) in enumerate(kpis)
+    )
+
+    charts = "".join([
+        chart(weekly, "events", "viewWeeklyEvents"),
+        chart(weekly, "revenue", "viewWeeklyRevenue"),
+        chart(monthly, "events", "viewMonthlyEvents"),
+        chart(monthly, "revenue", "viewMonthlyRevenue"),
+        chart(weekday, "events", "viewWeekdayEvents"),
+        chart(weekday, "revenue", "viewWeekdayRevenue"),
+    ])
+    trends = (
+        '<div class="exec-section" style="animation-delay:.26s">'
+        '<input type="checkbox" id="secTrend" class="exec-section-toggle" checked>'
+        '<label for="secTrend" class="exec-section-head"><div class="exec-section-title-group">'
+        '<div class="exec-section-name">Performance Trends</div>'
+        f'<div class="exec-section-teaser">Weekly / monthly / weekday &middot; events or revenue</div></div>'
+        '<span class="exec-section-chevron">&#9662;</span></label>'
+        '<div class="exec-section-body-wrap"><div class="exec-section-body"><div class="exec-trend-panel">'
+        '<input type="radio" name="trendview" id="trendWeekly" class="exec-lever-toggle" checked>'
+        '<input type="radio" name="trendview" id="trendMonthly" class="exec-lever-toggle">'
+        '<input type="radio" name="trendview" id="trendWeekday" class="exec-lever-toggle">'
+        '<input type="radio" name="trendmetric" id="metEvents" class="exec-lever-toggle" checked>'
+        '<input type="radio" name="trendmetric" id="metRevenue" class="exec-lever-toggle">'
+        '<div class="exec-lever-row">'
+        '<label for="trendWeekly" class="exec-lever-label">Weekly</label>'
+        '<label for="trendMonthly" class="exec-lever-label">Monthly</label>'
+        '<label for="trendWeekday" class="exec-lever-label">Weekday</label></div>'
+        '<div class="exec-lever-row is-metric">'
+        '<label for="metEvents" class="exec-lever-label">Events</label>'
+        '<label for="metRevenue" class="exec-lever-label">Revenue</label></div>'
+        f'<div class="exec-trend-views">{charts}</div>'
+        "</div></div></div></div>"
+    )
+
+    podium_order = [1, 0, 2]
+    podium_heights = {0: 112, 1: 94, 2: 82}
+    medals = {0: "&#129351;", 1: "&#129352;", 2: "&#129353;"}
+    podium = "".join(
+        f'<div class="exec-podium-slot rank-{position + 1}" style="height:{podium_heights[position]}px">'
+        f'<div class="exec-podium-medal">{medals[position]}</div>'
+        f'<div class="exec-podium-name">{esc(clients[position]["name"])}</div>'
+        f'<div class="exec-podium-stat">{clients[position]["events"]} events</div></div>'
+        for position in podium_order
+        if position < len(clients)
+    )
+    peak_client_events = max(row["events"] for row in clients) or 1
+    rank_rows = "".join(
+        f'<div class="exec-rank-row"><span class="exec-rank-num">{index + 1}</span>'
+        f'<div class="exec-rank-main"><div class="exec-rank-name">{esc(row["name"])}</div>'
+        f'<div class="exec-rank-track"><div class="exec-rank-fill" style="width:{max(4, round(row["events"] / peak_client_events * 100))}%"></div></div></div>'
+        f'<span class="exec-rank-stat">{row["events"]} &middot; {money(row["revenue"])}</span></div>'
+        for index, row in enumerate(clients[3:], start=3)
+    )
+    leaderboard = (
+        '<div class="exec-section" style="animation-delay:.32s">'
+        '<input type="checkbox" id="secClients" class="exec-section-toggle">'
+        '<label for="secClients" class="exec-section-head"><div class="exec-section-title-group">'
+        '<div class="exec-section-name">Client Leaderboard</div>'
+        f'<div class="exec-section-teaser">{esc(top_client["name"])} leads at {top_client["events"]} events</div></div>'
+        '<span class="exec-section-chevron">&#9662;</span></label>'
+        '<div class="exec-section-body-wrap"><div class="exec-section-body">'
+        f'<div class="exec-podium">{podium}</div>{rank_rows}</div></div></div>'
+    )
+
+    legend = "".join(
+        f'<div class="exec-legend-row"><span class="exec-legend-dot" style="background:{sector["color"]}"></span>'
+        f'{esc(sector["name"])}<strong>{sector["pct"]}%</strong></div>'
+        for sector in sectors
+    )
+    territory = (
+        '<div class="exec-section" style="animation-delay:.38s">'
+        '<input type="checkbox" id="secTerritory" class="exec-section-toggle">'
+        '<label for="secTerritory" class="exec-section-head"><div class="exec-section-title-group">'
+        '<div class="exec-section-name">Territory &amp; Sectors</div>'
+        f'<div class="exec-section-teaser">{len(sectors)} sectors &middot; {esc(sectors[0]["name"])} leads at {sectors[0]["pct"]}%</div></div>'
+        '<span class="exec-section-chevron">&#9662;</span></label>'
+        '<div class="exec-section-body-wrap"><div class="exec-section-body"><div class="exec-donut-wrap">'
+        f'<div class="exec-donut" style="background:{donut}">'
+        f'<div class="exec-donut-core"><div class="exec-donut-core-val">{d["career_events"]}</div>'
+        '<div class="exec-donut-core-lab">Events</div></div></div>'
+        f'<div class="exec-legend">{legend}</div></div></div></div></div>'
+    )
+
+    milestone_rows = "".join(
+        f'<div class="exec-milestone"><div class="exec-milestone-head">'
+        f'<span class="exec-milestone-name{" is-done" if row["done"] else ""}">{esc(row["name"])}</span>'
+        f'<span class="exec-milestone-detail">{esc(row["detail"])}</span></div>'
+        f'<div class="exec-progress-track"><div class="exec-progress-fill{" is-done" if row["done"] else ""}" '
+        f'style="width:{max(3, min(100, row["pct"]))}%"></div></div></div>'
+        for row in d["milestones"]
+    )
+    fame = (
+        '<div class="exec-section" style="animation-delay:.44s">'
+        '<input type="checkbox" id="secFame" class="exec-section-toggle">'
+        '<label for="secFame" class="exec-section-head"><div class="exec-section-title-group">'
+        '<div class="exec-section-name">Hall of Fame</div>'
+        f'<div class="exec-section-teaser">{achieved} achieved &middot; {in_progress} in progress</div></div>'
+        '<span class="exec-section-chevron">&#9662;</span></label>'
+        f'<div class="exec-section-body-wrap"><div class="exec-section-body">{milestone_rows}</div></div></div>'
+    )
+
+    st.markdown(
+        compact(
+            css
+            + '<div class="page-nav"><a href="?page=lab" target="_self">&larr; Lab</a>'
+            '<a href="?page=exec" target="_self" class="active">Executive</a></div>'
+            '<div class="section-kicker">DEMO DATA &middot; STRUCTURE PREVIEW</div>'
+            '<div class="section-title">EXECUTIVE SUMMARY</div>'
+            + hero
+            + f'<div class="exec-ticker"><div class="exec-ticker-track">{ticker}</div></div>'
+            + f'<div class="exec-kpi-grid">{kpi_html}</div>'
+            + trends
+            + leaderboard
+            + territory
+            + fame
+        ),
+        unsafe_allow_html=True,
+    )
 
 def main() -> None:
     configure_page()
